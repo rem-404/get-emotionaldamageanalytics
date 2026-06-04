@@ -1,4 +1,3 @@
-
 <#
 Emotional devastator v-1.0
 
@@ -6,7 +5,6 @@ Import-csv .\CsvOfDissapointment.csv
 
 CSV Format
 Date	Company	Position	Platform	Status	Notes	Odds	UserName	Password	Link
-
 #>
 
 function Get-EmotionalDamageAnalytics {
@@ -19,7 +17,9 @@ function Get-EmotionalDamageAnalytics {
     [string[]]$Status
   )
 
+
   BEGIN {
+    # declaring variables
     $FirstDate = $null
     $HiredCount = 0
     $DeniedCount = 0
@@ -27,15 +27,17 @@ function Get-EmotionalDamageAnalytics {
     $UncertainCount = 0
   }
 
+
   PROCESS {
     if ($null -eq $FirstDate -and $Date) {
       $FirstDate = $Date[0] 
     }
     
+    # data gathering
     foreach ($Stats in $Status) {
 
       if ($stats -eq 'hired') {
-        Write-Host "Boom! Hired! No emonotional damage here!" -ForegroundColor Green
+        Write-Host "Boom! Hired! No emotional damage here!" -ForegroundColor Green
         $HiredCount += 1
       }
       elseif ($Stats -eq 'denied') {
@@ -51,10 +53,12 @@ function Get-EmotionalDamageAnalytics {
 
   } # PROCESS
 
+
   END {
 
     $total = $HiredCount + $DeniedCount + $ResponseCount + $UncertainCount
 
+    # get the days since the first application
     $DaysPast = "Unknown"
     if ($FirstDate) {
       $DaysPast = [math]::Round(((Get-Date) - [DateTime]$FirstDate).TotalDays, 0)
@@ -73,10 +77,13 @@ function Get-EmotionalDamageAnalytics {
     # Check if the Math is mathing
     $ValidResponses = $DeniedCount + $ResponseCount
     if ($ValidResponses -gt 0) {
-      if ($DeniedCount -gt $ResponseCount) {
+      if ($uncertaincount -gt $DeniedCount + $ResponseCount) {
+        write-warning "high uncertainty detected: $([math]::round(($UncertainCount / $total * 100), 2))%%"
+      }
+      elseif ($DeniedCount -gt $ResponseCount) {
         write-warning "high denial rate detected: $([math]::round(($DeniedCount / ($DeniedCount + $ResponseCount) * 100), 2))%"
       }
-      else {
+      elseif ($ResponseCount -gt $DeniedCount) {
         write-host "Application status looks good: $([math]::round(($ResponseCount / ($DeniedCount + $ResponseCount) * 100), 2))% responded" -ForegroundColor Green
       }
     }
@@ -88,21 +95,3 @@ function Get-EmotionalDamageAnalytics {
   } # END
 
 } # function
-
-<#
-SAMPLE OUTPUT
-
-PS C:\Logs> import-csv .\CsvOfDisappointment.csv | Get-EmotionalDamageAnalytics
-
-CampaignStartDate : 6/3/2026
-DaysSinceStart    : 2
-TotalApplications : 7
-Hired             : 0
-Denied            : 3
-Responded         : 2
-Uncertain         : 2
-
-WARNING: high denial rate detected: 60%
-Uncertain outcomes: 28.57%
-PS C:\Logs>
-#>
