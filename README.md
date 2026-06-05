@@ -46,15 +46,17 @@ Work in progress — interview stage tracking, follow-up reminders, and a proper
 ```
 PS C:\Logs> import-csv .\CsvOfDisappointment.csv | Get-EmotionalDamageAnalytics
 
-CampaignStartDate : 6/3/2026
-DaysSinceStart    : 2
-TotalApplications : 7
+CampaignStartDate : 2026-06-01
+DaysSinceStart    : 4
+TotalApplications : 15
 Hired             : 0
-Denied            : 3
-Responded         : 2
-Uncertain         : 2
+Denied            : 0
+Responded         : 1
+Uncertain         : 11
+Ghosted           : 3
 
-WARNING: high denial rate detected: 60%
-Uncertain outcomes: 28.57%
+WARNING: high uncertainty detected: 73.33%
+Ghosting rate : 20%
+Uncertain rate: 73.33%
 PS C:\Logs>
 ```
