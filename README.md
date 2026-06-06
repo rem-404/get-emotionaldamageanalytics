@@ -1,62 +1,84 @@
 # Get-EmotionalDamageAnalytics
 *This script is for a lab environment and meant for learning purposes only*
 
-## What does it do
-Reads a CSV of job applications and returns a brutally honest summary of your job hunt campaign:
 
-Total applications sent
-Hired / Denied / Responded / Uncertain counts
-Days since campaign started
-Denial rate percentage with a warning if it's looking rough
-Uncertain outcome percentage for applications still in limbo
+## What does it do
+- Reads a CSV of job applications and returns a brutally honest summary of your job hunt campaign:
+- Total applications sent with full status breakdown (Hired / Denied / Responded / Uncertain / Ghosted)
+- Days since campaign started
+- Denial rate, response rate, ghosting rate, and uncertainty rate with color coded warnings
+- Skill Leaderboard — parses the Skills column across all applications and shows the top 5 most demanded skills in the market based on your own data
 
 ## What does it solve
-Job hunting is a numbers game and the emotional toll is real. This turns the pain into data — because nothing softens rejection like a percentage breakdown. Tracks progress over time so you know if the campaign is gaining traction or if it's time to update the resume. Again.
-
+- Job hunting is a numbers game and the emotional toll is real. This turns the pain into data — because nothing softens rejection like a percentage breakdown. The skill leaderboard is an accidental market analysis tool — after enough applications, the data tells you exactly what skills to prioritize next.
 
 ## Who's it for
-Anyone brave enough to quantify their own disappointment. Sysadmins, IT professionals, and anyone sending applications into the void and wondering if anyone is home.
-
+- Anyone brave enough to quantify their own disappointment.
+- Sysadmins, IT professionals, and anyone sending applications into the void and wondering if anyone is home.
+- Or someone who have patient in tracking their application journey
 
 ## Requirements
+- PowerShell 5.1+
+- A CSV of Disappointment with at least these required columns (marked with *):
 
-PowerShell 5.1+
-A CSV file of disappointments with at least these columns:
+`*Date, Company, Position, Platform, *Status, Notes, Odds, UserName, Password, Link, *AutomationStamp, *Skills`
 
-Date,Company,Position,Platform,Status,Notes,Odds,UserName,Password,Link
+- Valid Status values: `hired, denied, responded, ghosted, or anything else (counts as Uncertain)`
+- Skills column should be comma-separated values per row:`powershell, active directory, azure`
 
-Valid Status values: hired, denied, responded, or anything else (counts as Uncertain)
+## Usage
+``` powershell
+# Standard run
+Import-Csv .\CsvOfDisappointment.csv | Get-EmotionalDamageAnalytics
+
+# Pair with Ghost Detector for full pipeline
+Invoke-GhostDetector
+Import-Csv .\CsvOfDisappointment.csv | Get-EmotionalDamageAnalytics
+```
 
 ## Warning
-- hired status triggers a celebratory message and exits the emotional damage loop immediately - not yet implemented 
-- Denial rate warning fires when denials outnumber responses — this is PowerShell's way of saying "maybe update the resume"
-- **UserName and Password** columns are in the CSV format — do NOT store actual credentials in plaintext in a CSV. Ever. 😄
-- Script does not provide emotional support beyond color-coded percentages
+
+- Hired status triggers a celebration message — the script has no break yet so it will still finish the run. Fix coming in a future iteration 
+- UserName and Password columns exist in the CSV format — do NOT store actual credentials in plaintext. Ever.
+- `$ErrorActionPreference = 'Stop'` is set globally inside the function — errors that would normally be non-terminating will be caught by try/catch
+- Script does not provide emotional support beyond color-coded percentages and skill gap analysis
 
 ## Limitations
-- CampaignStartDate is pulled from the first row of the CSV — make sure the CSV is sorted by date
-- No visualization — just numbers and warnings
-- Does not track interview stages — responded is just responded, no follow-up granularity yet
+
+- CampaignStartDate is pulled from the first row — keep the CSV sorted by date
+- Skill leaderboard shows top 5 only — hardcoded, not currently a parameter
+- Skill matching is exact string after trim and lowercase — "powershell" and "PowerShell scripting" count as different skills
+- No visualization — just numbers, warnings, and a table
 - Cannot prevent you from checking the CSV at 2am
 
 ## Notes
-Work in progress — interview stage tracking, follow-up reminders, and a proper emotional damage score coming in a future iteration. Pairs well with coffee, a deep breath, and the knowledge that 1 out of 1000 is still a win.
+Started as a meme script for tracking job rejections. Accidentally became a legitimate market analysis tool when the Skills column leaderboard was added. Now tracks campaign health, ghosting rates, and skill demand simultaneously from a single CSV.
+Pairs with Invoke-GhostDetector for automated ghosting detection and status updates. Together they form a job hunt toolkit.
 
-## Sample Output
+## Example Output
 ```
 PS C:\Logs> import-csv .\CsvOfDisappointment.csv | Get-EmotionalDamageAnalytics
 
-CampaignStartDate : 2026-06-01
+CampaignStartDate : 2026-06-03
 DaysSinceStart    : 4
-TotalApplications : 15
+TotalApplications : 16
 Hired             : 0
 Denied            : 0
-Responded         : 1
-Uncertain         : 11
-Ghosted           : 3
+Responded         : 2
+Uncertain         : 12
+Ghosted           : 2
 
-WARNING: high uncertainty detected: 73.33%
-Ghosting rate : 20%
-Uncertain rate: 73.33%
-PS C:\Logs>
+WARNING: high uncertainty detected: 75%
+Ghosting rate : 12.5%
+Uncertain rate: 75%
+
+--- MARKET ANALYSIS ON SKILLSETS ---
+
+Skill                     Count
+-----                     -----
+data analist                  3
+random skills                 2
+can understand dino logic     1
+dna sequence                  1
+mktg                          1
 ```
