@@ -60,7 +60,7 @@ function Get-EmotionalDamageAnalytics {
       foreach ($SkillString in $Skills) {
         # TEST: Capture dynamic skills from the row
         if (-not [string]::IsNullOrWhiteSpace($SkillString)) {
-          $CleanedSkills = $SkillString.Split(',') | ForEach-Object { $_.Trim().ToLower() } # Split by comma, strip whitespace, make lowercase
+          $CleanedSkills = $SkillString.Split(',') | ForEach-Object { $_.Trim().ToLower() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } # Split by comma, strip whitespace, make lowercase
           $MasterSkillList += $CleanedSkills # Add them to collection natively
         }
       }
